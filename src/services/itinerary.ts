@@ -12,14 +12,10 @@ let trips: Trip[] = [];
 let activities: Activity[] = [];
 const categories = ["food", "transport", "sightseeing", "fun"];
 
-/*****************/
-/*    CRUD       */
-/*****************/
-
 // Find a Trip by ID
-export const findTrip = (id: string): Trip | undefined => {
+export const findTrip = (id: string): Trip => {
   const foundId = trips.find((t) => t.id === id);
-  if (!foundId) return undefined;
+  if (!foundId) throw new Error("Error!");
 
   return foundId;
 };
@@ -48,7 +44,7 @@ export const addActivity = (
   startTime: Date,
   category: Category,
   cost: number,
-): Activity | undefined => {
+): Activity => {
   // Search for parent ID
   const foundTrip = findTrip(tripId);
   if (!foundTrip) throw new Error("Error!");
@@ -75,7 +71,7 @@ export const addActivity = (
 export const deleteActivity = (
   tripId: string,
   activityId: string,
-): Activity | undefined => {
+): Activity => {
   // Find parents ID
   const foundTrip = findTrip(tripId);
   if (!foundTrip) throw new Error("Error!");
@@ -86,6 +82,7 @@ export const deleteActivity = (
 
   // Delete Activity
   const removedActivity = foundTrip.activities.splice(foundIndex, 1)[0];
+  if (!removedActivity) throw new Error("Error!");
   return removedActivity;
 };
 
@@ -94,7 +91,7 @@ export const updateActivity = (
   tripId: string,
   activityId: string,
   updates: Partial<Activity>,
-): Activity | undefined => {
+): Activity => {
   // Find Parent ID
   const foundTrip = findTrip(tripId);
   if (!foundTrip) throw new Error("Error!");
@@ -128,43 +125,31 @@ export const updateActivity = (
 /*******************************************/
 
 // View by Day
-// User choose a date.
-//  - program iterate through activities dates
-//  - compare timestamps of every date of every object with the user input
-//  - match the timestamps and store them in a new array
-//  - target the day value getDay()
-//  - convert to string toDateString()
-//  - Print the day of the week and the activities
-
 export const viewByDay = (tripId: string, date: Date): Activity[] => {
   const foundTrip = findTrip(tripId);
   if (!foundTrip) throw new Error("Error!");
 
-  const tripActivities = [...foundTrip.activities];
-  const dayStamp = tripActivities.filter(
-    (a) => a.startTime.toISOString() === date.toISOString(),
+  const tripDate = foundTrip.activities.filter(
+    (a) => a.startTime.toDateString() === date.toDateString(),
   );
-  dayStamp;
-  return dayActivities;
+  return tripDate;
 };
 
 // View by Categories
 export const viewByCategories = (
   tripId: string,
   label: Category,
-): Activity[] | undefined => {
+): Activity[] => {
   const foundTrip = findTrip(tripId);
   if (!foundTrip) throw new Error("Error!");
 
   const tripActivities = foundTrip.activities;
-
-  // const matchingDate =
   const activityCategories = tripActivities.filter((a) => a.category === label);
   return activityCategories;
 };
 
 // Sort ACtivities Chronologically
-export const sortChrono = (tripId: string): Activity[] | undefined => {
+export const sortChrono = (tripId: string): Activity[] => {
   const foundTrip = findTrip(tripId);
   if (!foundTrip) throw new Error("Error!");
 
@@ -178,11 +163,11 @@ export const sortChrono = (tripId: string): Activity[] | undefined => {
 export const highCostActivities = (
   tripId: string,
   limit: number,
-): Activity[] | undefined => {
+): Activity[] => {
   const foundTrip = findTrip(tripId);
   if (!foundTrip) throw new Error("Error!");
 
   const activityCosts = foundTrip.activities;
-  const tooHighCosts = activityCosts.filter((a) => a.cost >= limit);
+  const tooHighCosts = activityCosts.filter((a) => a.cost > limit);
   return tooHighCosts;
 };
