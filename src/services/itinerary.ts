@@ -1,6 +1,6 @@
 // Imports
 import type { Trip } from "../models/trip.js";
-import type { Activity } from "../models/activity.js";
+import type { Activity, Category } from "../models/activity.js";
 
 // Calculate Total Cost
 // export const calculateTotalCost = (trip: Trip): number => {
@@ -8,18 +8,21 @@ import type { Activity } from "../models/activity.js";
 // };
 
 // Variables
-const trips: Trip[] = [];
-const activities: Activity[] = [];
+let trips: Trip[] = [];
+let activities: Activity[] = [];
+const categories = ["food", "transport", "sightseeing", "fun"];
 
 // Functions
-const findTrip = (id: string): Trip | undefined => {
+// Find a Trip by ID
+export const findTrip = (id: string): Trip | undefined => {
   const foundId = trips.find((t) => t.id === id);
   if (!foundId) return undefined;
 
   return foundId;
 };
 
-const addTrip = (destination: string, startDate: Date): Trip => {
+// ADD A TRIP
+export const addTrip = (destination: string, startDate: Date): Trip => {
   // Generates ID
   const nextId: number = trips.length + 1;
   const stringId: string = nextId.toString();
@@ -31,15 +34,17 @@ const addTrip = (destination: string, startDate: Date): Trip => {
     startDate,
     activities: [],
   };
+  trips.push(newTrip);
   return newTrip;
 };
 
-const addActivity = (
+// Add activity to the array
+export const addActivity = (
   tripId: string,
   name: string,
   startTime: Date,
-  category?: [],
-  cost?: number,
+  category: Category,
+  cost: number,
 ): Activity | undefined => {
   // Search for parent ID
   const foundTrip = findTrip(tripId);
@@ -50,18 +55,22 @@ const addActivity = (
   const stringId: string = nextId.toString();
 
   // Create and push activity
-  const newActivity: Activity = {
+
+  const foundActivity: Activity = {
     id: stringId,
     name,
     startTime,
+    category,
+    cost,
   };
 
-  foundTrip.activities.push(newActivity);
+  foundTrip.activities.push(foundActivity);
 
-  return newActivity;
+  return foundActivity;
 };
 
-const deleteActivity = (
+// Delete activity from tha array
+export const deleteActivity = (
   tripId: string,
   activityId: string,
 ): Activity | undefined => {
@@ -78,13 +87,11 @@ const deleteActivity = (
   return removedActivity;
 };
 
-const updateActivity = (
+// Update an activity
+export const updateActivity = (
   tripId: string,
   activityId: string,
-  name: string,
-  startTime: Date,
-  category?: string,
-  cost?: number,
+  updates: Partial<Activity>,
 ): Activity | undefined => {
   // Find Parent ID
   const foundTrip = findTrip(tripId);
@@ -94,10 +101,23 @@ const updateActivity = (
   const foundActivity = foundTrip.activities.find((a) => a.id === activityId);
   if (!foundActivity) return undefined;
 
-  const updatedActivity: Activity = {
-    id: activityId,
-    name,
-    startTime,
-  };
-  return updatedActivity;
+  //
+  if (updates.name !== undefined && updates.name !== "")
+    foundActivity.name = updates.name;
+  if (
+    updates.startTime instanceof Date &&
+    !Number.isNaN(updates.startTime.getTime())
+  )
+    foundActivity.startTime = updates.startTime;
+  if (updates.category !== undefined && categories.includes(updates.category))
+    foundActivity.category = updates.category;
+  if (
+    updates.cost !== undefined &&
+    Number.isFinite(updates.cost) &&
+    updates.cost >= 0
+  )
+    foundActivity.cost = updates.cost;
+
+  return foundActivity;
 };
+//
