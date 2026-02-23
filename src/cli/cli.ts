@@ -6,6 +6,7 @@ import {
   getBudgetSummary,
 } from "../services/budget.js";
 import type { Trip } from "../models/trip.js";
+import { getDestinationInfo } from "../services/fetchDestination.js";
 
 // npx tsx src/cli/cli.ts to run file
 
@@ -13,7 +14,7 @@ import type { Trip } from "../models/trip.js";
 const trips: Trip[] = [
   {
     id: "1",
-    destination: "Paris",
+    destination: await getDestinationInfo("france"),
     startDate: new Date("2026-09-03"),
     activities: [
       {
@@ -41,7 +42,7 @@ const trips: Trip[] = [
   },
   {
     id: "2",
-    destination: "Tokyo",
+    destination: await getDestinationInfo("japan"),
     startDate: new Date("2026-12-10"),
     activities: [
       {
