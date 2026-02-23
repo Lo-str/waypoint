@@ -2,14 +2,9 @@
 import type { Trip } from "../models/trip.js";
 import type { Activity, Category } from "../models/activity.js";
 
-// Calculate Total Cost
-// export const calculateTotalCost = (trip: Trip): number => {
-//   return trip.activities.reduce((sum, activity) => sum + activity.cost, 0);
-// };
-
 // Variables
 let trips: Trip[] = [];
-let activities: Activity[] = [];
+// let activities: Activity[] = [];
 const categories = ["food", "transport", "sightseeing", "fun"];
 
 // Find a Trip by ID
