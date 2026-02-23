@@ -21,7 +21,7 @@ const trips: Trip[] = [
         cost: 30,
         id: "1",
         category: "food",
-        startTime: new Date(), // I'm confused about this date
+        startTime: new Date(),
       },
       {
         name: "Louvre Museum",
@@ -74,7 +74,10 @@ const handleBudgetMenu = async (selectedTrip: Trip) => {
     {
       type: "list",
       name: "budgetAction",
-      message: `Budget Management Options for ${selectedTrip.destination}:`,
+      message: `Budget Management Options for ${selectedTrip.destination}: \n
+      - View Total Cost \n
+      - Filter Activities \n
+      - Back to Main Menu \n`,
       choices: [
         "View Total Cost",
         "Filter Activities", // High cost vs within budget activities
@@ -94,7 +97,7 @@ const handleBudgetMenu = async (selectedTrip: Trip) => {
         {
           type: "number",
           name: "amount",
-          message: "Enter the budget/threshold amount:",
+          message: "Enter the threshold amount:",
         },
       ]);
 
@@ -125,7 +128,11 @@ const mainMenu = async () => {
     {
       type: "list",
       name: "action",
-      message: `What would you like to do?`, // The choices doesn't show up
+      message: `What would you like to do?
+      - View Trips \n
+      - Add Activity \n
+      - View Budget \n
+      - Exit \n`,
       choices: ["View Trips", "Add Activity", "View Budget", "Exit"],
     },
   ]);
@@ -137,8 +144,10 @@ const mainMenu = async () => {
         {
           type: "list",
           name: "selectedTripName",
-          message: "Select a trip to manage:",
-          choices: trips.map((t) => t.destination), // The choices doesn't show up
+          message: `Select a trip to manage: \n
+          - Paris \n
+          - Tokyo \n`,
+          choices: trips.map((t) => t.destination),
         },
       ]);
 
