@@ -17,19 +17,20 @@ import {
 
 // findTrip()
 test("returns error message when trip is not found", () => {
-  expect(() => findTrip("999")).toThrowError("Error!");
+  expect(() => findTrip("999")).toThrowError("Trip not found");
 });
 
 // addTrip()
 test("returns added trip", () => {
-  const trip = addTrip("Brazil", new Date("2026-07-10"));
-  expect(trip.destination).toBe("Brazil");
+  const trip = addTrip("Rio de Janeiro", "Brazil", new Date("2026-07-10"));
+  expect(trip.destination).toBe("Rio de Janeiro");
+  expect(trip.country).toBe("Brazil");
   expect(trip.startDate.toISOString().slice(0, 10)).toBe("2026-07-10");
   expect(trip.activities).toEqual([]);
 });
 
 // Test trip
-const testTrip = addTrip("Brazil", new Date("2026-07-10"));
+const testTrip = addTrip("Rio de Janeiro", "Brazil", new Date("2026-07-10"));
 
 // addActivity()
 test("returns added activity when trip has been found", () => {
@@ -62,17 +63,17 @@ test("returns error message when trip not found", () => {
       "fun",
       20,
     ),
-  ).toThrowError("Error!");
+  ).toThrowError("Trip not found");
 });
 
 // deleteActivity()
 test("returns error message when trip is not found and deleted activity when deleted", () => {
-  expect(() => deleteActivity("999", "991")).toThrowError("Error!");
+  expect(() => deleteActivity("999", "991")).toThrowError("Trip not found");
 });
 
 // updateActivity()
 test("return updated activity", () => {
-  const testTrip2 = addTrip("Iceland", new Date("2027-07-10"));
+  const testTrip2 = addTrip("Reykjavik", "Iceland", new Date("2027-07-10"));
   const testActivity = addActivity(
     testTrip2.id,
     "Museum",
@@ -108,24 +109,24 @@ test("return updated activity", () => {
 });
 
 test("returns error message when updateActivity activity id is missing", () => {
-  const trip = addTrip("Japan", new Date("2027-03-10"));
+  const trip = addTrip("Tokyo", "Japan", new Date("2027-03-10"));
 
   expect(() =>
     updateActivity(trip.id, "999", {
       name: "Should not update",
     }),
-  ).toThrowError("Error!");
+  ).toThrowError("Activity not found");
 });
 
 /*********************************************/
 /*  ACTIVITIES VIEWED BY SPECIFIC CRITERIA  */
 /*******************************************/
 // test trips
-const trip1 = addTrip("Japan", new Date("2027-03-10"));
-const trip2 = addTrip("Brazil", new Date("2027-04-01"));
-const trip3 = addTrip("Iceland", new Date("2027-05-15"));
-const trip4 = addTrip("Italy", new Date("2027-06-20"));
-const trip5 = addTrip("Canada", new Date("2027-07-05"));
+const trip1 = addTrip("Tokyo", "Japan", new Date("2027-03-10"));
+const trip2 = addTrip("Rio de Janeiro", "Brazil", new Date("2027-04-01"));
+const trip3 = addTrip("Reykjavik", "Iceland", new Date("2027-05-15"));
+const trip4 = addTrip("Rome", "Italy", new Date("2027-06-20"));
+const trip5 = addTrip("Vancouver", "Canada", new Date("2027-07-05"));
 
 const t1a1 = addActivity(
   trip1.id,
