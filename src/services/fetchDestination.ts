@@ -1,7 +1,7 @@
 // Async API Fetch
 
-import type { DestinationInfo } from "../models/destination.ts";
-import type { RestCountryResponse } from "../models/destination.ts";
+import type { DestinationInfo } from "./destination.js";
+import type { RestCountryResponse } from "./destination.js";
 
 // main function: fetch cpuntry info from rest
 export const getDestinationInfo = async (
@@ -32,7 +32,9 @@ export const getDestinationInfo = async (
       // We check if currencies contain any keys. Otherwise we raise error since we won't find symbol or name later.
       throw new Error("Currency information not available");
     }
-    const flagUrl = destinationInfoData.flags.png;
+    if (!destinationInfoData.flag) {
+      throw new Error("Flag information not available");
+    }
     const currency = Object.values(destinationInfoData.currencies)[0]!; // Then we take the values, i.e., { "symbol": "kr", "name": "Swedish krona" }
     //console.log(data[0]?.flag); // try to find another value here if needed (flag)
     return {
@@ -43,7 +45,7 @@ export const getDestinationInfo = async (
         symbol: currency.symbol,
         name: currency.name,
       },
-      flag: flagUrl,
+      flag: destinationInfoData.flag,
     };
   } catch (error: unknown) {
     if (error instanceof Error) {
