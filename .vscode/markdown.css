@@ -1,0 +1,144 @@
+/* ===============================
+   HEADERS
+   =============================== */
+h1 {
+  color: #5cffb3;
+}
+h2 {
+  color: #96cdb0;
+}
+h3 {
+  color: #c18d52;
+}
+
+/* ===============================
+   CODE
+   =============================== */
+code {
+  background: #121417;
+  color: #ffd76a;
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+
+pre {
+  background: linear-gradient(135deg, #14161a, #0e1013);
+  border: 1px solid #ffd45dc5;
+  border-radius: 14px;
+  padding: 16px;
+  overflow: auto;
+}
+
+pre code {
+  background: transparent;
+  color: #e6edf3;
+  padding: 0;
+}
+
+/* ===============================
+   CALLOUT BASE (HTML + Markdown)
+   =============================== */
+.callout,
+blockquote {
+  background: linear-gradient(135deg, #203b37, #081b1b);
+  border-left: 6px solid #5a8f76;
+  border-radius: 14px;
+  padding: 14px 18px;
+  margin: 26px 0;
+  color: #eee8b2;
+}
+
+/* ---------- TITLE ---------- */
+.callout-title {
+  font-weight: 800;
+  font-size: 0.8rem;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+/* ===============================
+   HTML CALLOUT TYPES
+   =============================== */
+.callout.tip {
+  border-left-color: #96cdb0;
+}
+.callout.tip .callout-title {
+  background: #96cdb0;
+  color: #081b1b;
+}
+
+.callout.warning {
+  border-left-color: #c18d52;
+}
+.callout.warning .callout-title {
+  background: #c18d52;
+  color: #081b1b;
+}
+
+.callout.remember {
+  border-left-color: #eee8b2;
+}
+.callout.remember .callout-title {
+  background: #eee8b2;
+  color: #081b1b;
+}
+
+/* ===============================
+   MARKDOWN [!TIP] SUPPORT
+   =============================== */
+
+/* Remove default italic */
+blockquote p {
+  margin: 0;
+}
+
+/* TIP */
+blockquote:has(> p:first-child:contains("[!TIP]")) {
+  border-left-color: #96cdb0;
+}
+blockquote:has(> p:first-child:contains("[!TIP]"))::before {
+  content: "TIP";
+  background: #96cdb0;
+  color: #081b1b;
+}
+
+/* WARNING */
+blockquote:has(> p:first-child:contains("[!WARNING]")) {
+  border-left-color: #c18d52;
+}
+blockquote:has(> p:first-child:contains("[!WARNING]"))::before {
+  content: "WARNING";
+  background: #c18d52;
+  color: #081b1b;
+}
+
+/* REMEMBER */
+blockquote:has(> p:first-child:contains("[!REMEMBER]")) {
+  border-left-color: #eee8b2;
+}
+blockquote:has(> p:first-child:contains("[!REMEMBER]"))::before {
+  content: "REMEMBER";
+  background: #eee8b2;
+  color: #081b1b;
+}
+
+/* Shared badge styling */
+blockquote::before {
+  position: absolute;
+  top: -10px;
+  left: 14px;
+  font-weight: 700;
+  font-size: 0.75rem;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+/* Hide marker text */
+blockquote p:first-child:contains("[!TIP]"),
+blockquote p:first-child:contains("[!WARNING]"),
+blockquote p:first-child:contains("[!REMEMBER]") {
+  display: none;
+}

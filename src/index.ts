@@ -1,2 +1,1 @@
-console.log("🌍 Travel Guide CLI starting...");
-console.log("Type --help to see available commands.");
+import "./cli/cli.js";
