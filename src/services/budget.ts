@@ -1,4 +1,4 @@
-import type { Activity } from "../models/activity.js";
+import type { Activity } from "../models/types.js";
 import type { Trip } from "../models/trip.js";
 
 // Cost of every activity (code from document)
@@ -29,4 +29,3 @@ export const getBudgetSummary = (trip: Trip): string => {
   const total = calculateTotalCost(trip);
   return `Total Trip Cost for ${trip.destination}: $${total.toFixed(2)}`;
 };
-

@@ -1,5 +1,5 @@
 // Imports
-import * as readline from "readline";
+import { createInterface } from "readline";
 import { activityMenu, budgetMenu, logo, tripMenu, uxMenu } from "./design.js";
 import { getBudgetSummary } from "../services/budget.js";
 import { getDestinationInfo } from "../services/destination.js";
@@ -16,14 +16,13 @@ import {
   viewByCategories,
   viewByDay,
 } from "../services/itinerary.js";
-import type { Activity, Category } from "../models/activity.js";
-import type { Trip } from "../models/trip.js";
+import type { Activity, Category, Trip } from "../models/types.js";
 
 // Vars
-const rl = readline.createInterface({
+const rl = createInterface({
   input: process.stdin,
   output: process.stdout,
-});
+}); // Lo don't forget rl.close() !!! stdin is listening for user input foreveeeerrr!
 
 let userName = "Barnaby";
 const categories: Category[] = ["food", "transport", "sightseeing", "fun"];
