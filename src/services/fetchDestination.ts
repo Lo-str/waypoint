@@ -32,8 +32,8 @@ export const getDestinationInfo = async (
       // We check if currencies contain any keys. Otherwise we raise error since we won't find symbol or name later.
       throw new Error("Currency information not available");
     }
-    if (!destinationInfoData.flag) {
-      throw new Error("Flag information not available");
+    if (!destinationInfoData.flags?.png) {
+      throw new Error("Flag PNG not available");
     }
     const currency = Object.values(destinationInfoData.currencies)[0]!; // Then we take the values, i.e., { "symbol": "kr", "name": "Swedish krona" }
     //console.log(data[0]?.flag); // try to find another value here if needed (flag)
@@ -45,7 +45,7 @@ export const getDestinationInfo = async (
         symbol: currency.symbol,
         name: currency.name,
       },
-      flag: destinationInfoData.flag,
+      flag: destinationInfoData.flags.png,
     };
   } catch (error: unknown) {
     if (error instanceof Error) {

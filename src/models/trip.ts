@@ -1,11 +1,11 @@
 // Imports
-import type { Activity } from "./activity.js";
-import type { DestinationInfo } from "../services/destination.js";
+import type { Activity } from "./types.js";
 
 // Types
 export type Trip = {
   id: string;
-  destination: DestinationInfo;
+  destination: string;
+  country: string;
   startDate: Date;
   activities: Activity[];
 };

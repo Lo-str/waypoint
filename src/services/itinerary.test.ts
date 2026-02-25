@@ -17,7 +17,9 @@ import {
 
 // findTrip()
 test("returns error message when trip is not found", () => {
-  expect(() => findTrip("999")).toThrowError("Trip not found");
+  expect(() => findTrip("999")).toThrowError(
+    "Trip 🫣 Sadly this trip doesn't exist yet.",
+  );
 });
 
 // addTrip()
@@ -63,12 +65,14 @@ test("returns error message when trip not found", () => {
       "fun",
       20,
     ),
-  ).toThrowError("Trip not found");
+  ).toThrowError("Trip 🫣 Sadly this trip doesn't exist yet.");
 });
 
 // deleteActivity()
 test("returns error message when trip is not found and deleted activity when deleted", () => {
-  expect(() => deleteActivity("999", "991")).toThrowError("Trip not found");
+  expect(() => deleteActivity("999", "991")).toThrowError(
+    "Trip 🫣 Sadly this trip doesn't exist yet.",
+  );
 });
 
 // updateActivity()
@@ -115,7 +119,7 @@ test("returns error message when updateActivity activity id is missing", () => {
     updateActivity(trip.id, "999", {
       name: "Should not update",
     }),
-  ).toThrowError("Activity not found");
+  ).toThrowError("Activity 😶‍🌫️ Couldn't find this activity.");
 });
 
 /*********************************************/
@@ -308,6 +312,34 @@ const t5a5 = addActivity(
   38,
 );
 
+void [
+  t1a1,
+  t1a2,
+  t1a3,
+  t1a4,
+  t1a5,
+  t2a1,
+  t2a2,
+  t2a3,
+  t2a4,
+  t2a5,
+  t3a1,
+  t3a2,
+  t3a3,
+  t3a4,
+  t3a5,
+  t4a1,
+  t4a2,
+  t4a3,
+  t4a4,
+  t4a5,
+  t5a1,
+  t5a2,
+  t5a3,
+  t5a4,
+  t5a5,
+];
+
 // viewByDay()
 
 test("returns the activities of the day input of a chosen trip", () => {
@@ -323,6 +355,15 @@ test("returns the activities of the day input of a chosen trip", () => {
 });
 
 // viewByCategories
+test("returns activities of a chosen category in a chosen trip", () => {
+  const foodActivities = viewByCategories(trip2.id, "food");
+
+  expect(foodActivities.length).toBe(2);
+  expect(foodActivities.every((a) => a.category === "food")).toBe(true);
+  expect(foodActivities.some((a) => a.name === "Breakfast")).toBe(true);
+  expect(foodActivities.some((a) => a.name === "Steakhouse")).toBe(true);
+});
+
 test("returns activities of a chosen trip chronologically", () => {
   const activities = sortChrono(trip2.id);
 

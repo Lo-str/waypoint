@@ -18,5 +18,7 @@ export type RestCountryResponse = {
     common: string;
   };
   capital: string[];
-  flag: string;
+  flags: {
+    png: string;
+  };
 };

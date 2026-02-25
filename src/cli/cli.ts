@@ -1,4 +1,8 @@
 // Imports
+import { spawnSync } from "child_process";
+import { rmSync } from "fs";
+import { tmpdir } from "os";
+import { join } from "path";
 import { createInterface } from "readline";
 import { activityMenu, budgetMenu, logo, tripMenu, uxMenu } from "./design.js";
 import { getBudgetSummary } from "../services/budget.js";
@@ -38,6 +42,32 @@ const ask = (question: string): Promise<string> => {
 
 const pause = async () => {
   await ask("\nPress Enter to continue...");
+};
+
+const tryRenderFlagPng = (flagUrl: string): boolean => {
+  const termProgram = process.env["TERM_PROGRAM"]?.toLowerCase() ?? "";
+  if (!termProgram.includes("wezterm")) return false;
+
+  const tempFile = join(
+    tmpdir(),
+    `travel-guide-flag-${Date.now()}-${Math.random().toString(36).slice(2)}.png`,
+  );
+
+  try {
+    const download = spawnSync("curl", ["-L", "-sS", "-o", tempFile, flagUrl], {
+      stdio: "ignore",
+    });
+    if (download.status !== 0) return false;
+
+    const result = spawnSync("wezterm", ["imgcat", tempFile], {
+      stdio: "inherit",
+    });
+    return result.status === 0;
+  } catch {
+    return false;
+  } finally {
+    rmSync(tempFile, { force: true });
+  }
 };
 
 const parseDate = (raw: string): Date | null => {
@@ -323,8 +353,12 @@ const handleTripInfo = async () => {
 
     const info = await getDestinationInfo(selectedTrip.country);
     console.log(
-      `\n${trip.destination}, ${trip.country} ${info.flag} | Currency: ${info.currency.name} ${info.currency.symbol} `,
+      `\n${trip.destination}, ${trip.country} | Currency: ${info.currency.name} ${info.currency.symbol}`,
     );
+    const rendered = tryRenderFlagPng(info.flag);
+    if (!rendered) {
+      console.log(`Flag PNG: ${info.flag}`);
+    }
   } catch (error) {
     console.log(`\n${(error as Error).message}`);
   }
@@ -546,19 +580,19 @@ const handleViewByCategory = async () => {
   if (!selectedTrip) return;
   if (!(await checkTripHasActivities(selectedTrip.id))) return;
 
-  // const categoryInput = await ask(
-  //   "Category (food/transport/sightseeing/fun): ",
-  // );
-  // const category = parseCategory(categoryInput);
+  const categoryInput = await ask(
+    "Category (food/transport/sightseeing/fun): ",
+  );
+  const category = parseCategory(categoryInput);
 
-  // if (!category) {
-  //   console.log("\nInvalid category.");
-  //   await pause();
-  //   return;
-  // }
+  if (!category) {
+    console.log("\nInvalid category.");
+    await pause();
+    return;
+  }
 
   try {
-    const activities = viewByCategories(selectedTrip.id, selectedTrip.category);
+    const activities = viewByCategories(selectedTrip.id, category);
     console.table(activities);
   } catch (error) {
     console.log(`\n${(error as Error).message}`);
@@ -651,34 +685,34 @@ const seedDemoData = () => {
     30,
   );
 
-  const lisbon = addTrip("Lisbon", "Portugal", new Date("2026-07-02"));
+  const salvador = addTrip("Salvador", "Brasil", new Date("2026-07-02"));
   addActivity(
-    lisbon.id,
-    "Tram 28 day pass",
+    salvador.id,
+    "Brasil 28 day pass",
     new Date("2026-07-02T09:00:00"),
     "transport",
     10,
   );
   addActivity(
-    lisbon.id,
-    "Alfama food tasting",
+    salvador.id,
+    "Food tasting",
     new Date("2026-07-02T13:00:00"),
     "food",
     35,
   );
   addActivity(
-    lisbon.id,
-    "Belem Tower visit",
+    salvador.id,
+    "Museum",
     new Date("2026-07-03T10:00:00"),
     "sightseeing",
     15,
   );
   addActivity(
-    lisbon.id,
-    "Fado night",
+    salvador.id,
+    "Salvador at night",
     new Date("2026-07-03T21:00:00"),
     "fun",
-    28,
+    50,
   );
 
   const kyoto = addTrip("Kyoto", "Japan", new Date("2026-09-14"));
