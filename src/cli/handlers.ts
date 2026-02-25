@@ -16,15 +16,17 @@ import {
 } from "../services/itinerary.js";
 import { tryRenderFlagPng } from "./flag.js";
 import { parseCategory, parseDate, parseDateTimeParts } from "./parsers.js";
-import type { AskFn, PauseFn } from "./types.js";
 
-// Public actions consumed by menu loops.
+// Actions that menu files can call.
 export type CliHandlers = {
   handleAddTrip: (pauseAfter?: boolean) => Promise<void>;
   handleDeleteTrip: () => Promise<void>;
   handleTripInfo: () => Promise<void>;
   handleViewAllTrips: () => Promise<void>;
-  handleAddActivity: (pauseAfter?: boolean, presetTripId?: string) => Promise<void>;
+  handleAddActivity: (
+    pauseAfter?: boolean,
+    presetTripId?: string,
+  ) => Promise<void>;
   handleUpdateActivity: () => Promise<void>;
   handleDeleteActivity: () => Promise<void>;
   handleViewActivityMenu: () => Promise<void>;
@@ -32,15 +34,18 @@ export type CliHandlers = {
   handleBudgetHighCosts: () => Promise<void>;
 };
 
-// Runtime dependencies injected from the CLI bootstrap.
+// Action menu loops.
+type AskFn = (question: string) => Promise<string>;
+type PauseFn = () => Promise<void>;
+
 type HandlerDeps = {
   ask: AskFn;
   pause: PauseFn;
 };
 
-// Build all handler functions with shared dependencies and helper utilities.
+// Create action functions.
 export const createHandlers = ({ ask, pause }: HandlerDeps): CliHandlers => {
-  // Ensure there is at least one trip before running trip-dependent actions.
+  // Check if we have at least one trip.
   const checkTripsExist = async (): Promise<boolean> => {
     if (listTrips().length > 0) return true;
 
@@ -55,7 +60,7 @@ export const createHandlers = ({ ask, pause }: HandlerDeps): CliHandlers => {
     return false;
   };
 
-  // Let the user choose a trip from a numbered list.
+  // Pick a trip by number.
   const pickTrip = async (title: string): Promise<Trip | null> => {
     const trips = listTrips();
     if (trips.length === 0) return null;
@@ -68,7 +73,11 @@ export const createHandlers = ({ ask, pause }: HandlerDeps): CliHandlers => {
     }
 
     const selected = Number(await ask("Choose trip number: "));
-    if (!Number.isInteger(selected) || selected < 1 || selected > trips.length) {
+    if (
+      !Number.isInteger(selected) ||
+      selected < 1 ||
+      selected > trips.length
+    ) {
       console.log("\nInvalid selection.");
       await pause();
       return null;
@@ -77,13 +86,15 @@ export const createHandlers = ({ ask, pause }: HandlerDeps): CliHandlers => {
     return trips[selected - 1] ?? null;
   };
 
-  // Ensure the selected trip has activities; optionally guide the user to add one.
+  // Check if trip has activities. Offer to add one if empty.
   const checkTripHasActivities = async (tripId: string): Promise<boolean> => {
     try {
       const trip = findTrip(tripId);
       if (trip.activities.length > 0) return true;
 
-      const choice = await ask("\nThis trip has no activities. Add one now? (y/n): ");
+      const choice = await ask(
+        "\nThis trip has no activities. Add one now? (y/n): ",
+      );
       if (choice.toLowerCase() === "y") {
         await handleAddActivity(false, tripId);
         if (findTrip(tripId).activities.length > 0) return true;
@@ -99,8 +110,11 @@ export const createHandlers = ({ ask, pause }: HandlerDeps): CliHandlers => {
     return false;
   };
 
-  // Let the user choose an activity inside a selected trip.
-  const pickActivity = async (tripId: string, title: string): Promise<Activity | null> => {
+  // Pick activity by number.
+  const pickActivity = async (
+    tripId: string,
+    title: string,
+  ): Promise<Activity | null> => {
     const trip = findTrip(tripId);
     const activities = trip.activities;
     if (activities.length === 0) return null;
@@ -108,14 +122,21 @@ export const createHandlers = ({ ask, pause }: HandlerDeps): CliHandlers => {
     console.log(`\n${title}`);
     for (let i = 0; i < activities.length; i++) {
       const activity = activities[i]!;
-      const time = activity.startTime.toISOString().replace("T", " ").slice(0, 16);
+      const time = activity.startTime
+        .toISOString()
+        .replace("T", " ")
+        .slice(0, 16);
       console.log(
         `${i + 1}. ${activity.name} | ${activity.category} | $${activity.cost} | ${time}`,
       );
     }
 
     const selected = Number(await ask("Choose activity number: "));
-    if (!Number.isInteger(selected) || selected < 1 || selected > activities.length) {
+    if (
+      !Number.isInteger(selected) ||
+      selected < 1 ||
+      selected > activities.length
+    ) {
       console.log("\nInvalid selection.");
       await pause();
       return null;
@@ -124,7 +145,7 @@ export const createHandlers = ({ ask, pause }: HandlerDeps): CliHandlers => {
     return activities[selected - 1] ?? null;
   };
 
-  // Create a new trip from interactive user input.
+  // Create a trip.
   const handleAddTrip = async (pauseAfter = true): Promise<void> => {
     const destination = await ask("Destination: ");
     const country = await ask("Country: ");
@@ -142,7 +163,7 @@ export const createHandlers = ({ ask, pause }: HandlerDeps): CliHandlers => {
     if (pauseAfter) await pause();
   };
 
-  // Delete one selected trip.
+  // Delete a trip.
   const handleDeleteTrip = async (): Promise<void> => {
     if (!(await checkTripsExist())) return;
 
@@ -158,7 +179,7 @@ export const createHandlers = ({ ask, pause }: HandlerDeps): CliHandlers => {
     await pause();
   };
 
-  // Fetch and show destination metadata (currency + flag).
+  // Show trip's country info.
   const handleTripInfo = async (): Promise<void> => {
     if (!(await checkTripsExist())) return;
 
@@ -181,7 +202,7 @@ export const createHandlers = ({ ask, pause }: HandlerDeps): CliHandlers => {
     await pause();
   };
 
-  // Render all trips in table format.
+  // Show all trips in a table.
   const handleViewAllTrips = async (): Promise<void> => {
     const trips = listTrips();
     if (trips.length === 0) {
@@ -203,7 +224,7 @@ export const createHandlers = ({ ask, pause }: HandlerDeps): CliHandlers => {
     await pause();
   };
 
-  // Create a new activity for a selected trip (or preset trip id).
+  // Create an activity.
   const handleAddActivity = async (
     pauseAfter = true,
     presetTripId?: string,
@@ -220,14 +241,22 @@ export const createHandlers = ({ ask, pause }: HandlerDeps): CliHandlers => {
     const name = await ask("Activity name: ");
     const activityDate = await ask("Date (YYYY-MM-DD): ");
     const activityTime = await ask("Time (HH:mm): ");
-    const categoryInput = await ask("Category (food/transport/sightseeing/fun): ");
+    const categoryInput = await ask(
+      "Category (food/transport/sightseeing/fun): ",
+    );
     const costInput = await ask("Cost: ");
 
     const startTime = parseDateTimeParts(activityDate, activityTime);
     const category = parseCategory(categoryInput);
     const cost = Number(costInput);
 
-    if (!name || !startTime || !category || !Number.isFinite(cost) || cost < 0) {
+    if (
+      !name ||
+      !startTime ||
+      !category ||
+      !Number.isFinite(cost) ||
+      cost < 0
+    ) {
       console.log("\nInvalid activity input.");
       await pause();
       return;
@@ -242,7 +271,7 @@ export const createHandlers = ({ ask, pause }: HandlerDeps): CliHandlers => {
     if (pauseAfter) await pause();
   };
 
-  // Update selected activity fields using partial input.
+  // Update activity. Some field optional.
   const handleUpdateActivity = async (): Promise<void> => {
     if (!(await checkTripsExist())) return;
 
@@ -250,7 +279,10 @@ export const createHandlers = ({ ask, pause }: HandlerDeps): CliHandlers => {
     if (!selectedTrip) return;
     if (!(await checkTripHasActivities(selectedTrip.id))) return;
 
-    const selectedActivity = await pickActivity(selectedTrip.id, "Select an activity to update:");
+    const selectedActivity = await pickActivity(
+      selectedTrip.id,
+      "Select an activity to update:",
+    );
     if (!selectedActivity) return;
 
     const name = await ask("New name (Enter to skip): ");
@@ -298,7 +330,11 @@ export const createHandlers = ({ ask, pause }: HandlerDeps): CliHandlers => {
     }
 
     try {
-      const updated = updateActivity(selectedTrip.id, selectedActivity.id, updates);
+      const updated = updateActivity(
+        selectedTrip.id,
+        selectedActivity.id,
+        updates,
+      );
       console.log(`\nUpdated activity ${updated.id}.`);
     } catch (error) {
       console.log(`\n${(error as Error).message}`);
@@ -306,15 +342,20 @@ export const createHandlers = ({ ask, pause }: HandlerDeps): CliHandlers => {
     await pause();
   };
 
-  // Delete one selected activity from a selected trip.
+  // Delete an activity.
   const handleDeleteActivity = async (): Promise<void> => {
     if (!(await checkTripsExist())) return;
 
-    const selectedTrip = await pickTrip("Select a trip to delete an activity from:");
+    const selectedTrip = await pickTrip(
+      "Select a trip to delete an activity from:",
+    );
     if (!selectedTrip) return;
     if (!(await checkTripHasActivities(selectedTrip.id))) return;
 
-    const selectedActivity = await pickActivity(selectedTrip.id, "Select an activity to delete:");
+    const selectedActivity = await pickActivity(
+      selectedTrip.id,
+      "Select an activity to delete:",
+    );
     if (!selectedActivity) return;
 
     try {
@@ -326,7 +367,7 @@ export const createHandlers = ({ ask, pause }: HandlerDeps): CliHandlers => {
     await pause();
   };
 
-  // Show activities filtered by a specific date.
+  // Show activities for one date.
   const handleViewByDay = async (): Promise<void> => {
     const selectedTrip = await pickTrip("Select a trip to view activities:");
     if (!selectedTrip) return;
@@ -350,13 +391,15 @@ export const createHandlers = ({ ask, pause }: HandlerDeps): CliHandlers => {
     await pause();
   };
 
-  // Show activities filtered by a selected category.
+  // Show activities for one category.
   const handleViewByCategory = async (): Promise<void> => {
     const selectedTrip = await pickTrip("Select a trip to view activities:");
     if (!selectedTrip) return;
     if (!(await checkTripHasActivities(selectedTrip.id))) return;
 
-    const categoryInput = await ask("Category (food/transport/sightseeing/fun): ");
+    const categoryInput = await ask(
+      "Category (food/transport/sightseeing/fun): ",
+    );
     const category = parseCategory(categoryInput);
 
     if (!category) {
@@ -374,7 +417,7 @@ export const createHandlers = ({ ask, pause }: HandlerDeps): CliHandlers => {
     await pause();
   };
 
-  // Show activities sorted by start time.
+  // Show activities chronologically.
   const handleViewChronological = async (): Promise<void> => {
     const selectedTrip = await pickTrip("Select a trip to view activities:");
     if (!selectedTrip) return;
@@ -389,7 +432,7 @@ export const createHandlers = ({ ask, pause }: HandlerDeps): CliHandlers => {
     await pause();
   };
 
-  // Nested view menu for activity filtering/sorting options.
+  // Menu for activity viewing options.
   const handleViewActivityMenu = async (): Promise<void> => {
     if (!(await checkTripsExist())) return;
 
@@ -426,7 +469,7 @@ export const createHandlers = ({ ask, pause }: HandlerDeps): CliHandlers => {
     }
   };
 
-  // Show trip total cost summary.
+  // Total cost for a trip.
   const handleBudgetBalance = async (): Promise<void> => {
     if (!(await checkTripsExist())) return;
 
@@ -442,11 +485,13 @@ export const createHandlers = ({ ask, pause }: HandlerDeps): CliHandlers => {
     await pause();
   };
 
-  // Show activities that exceed a user-defined cost threshold.
+  // Display high cost activities.
   const handleBudgetHighCosts = async (): Promise<void> => {
     if (!(await checkTripsExist())) return;
 
-    const selectedTrip = await pickTrip("Select a trip for high-cost filtering:");
+    const selectedTrip = await pickTrip(
+      "Select a trip for high-cost filtering:",
+    );
     if (!selectedTrip) return;
     if (!(await checkTripHasActivities(selectedTrip.id))) return;
 
@@ -468,7 +513,7 @@ export const createHandlers = ({ ask, pause }: HandlerDeps): CliHandlers => {
     await pause();
   };
 
-  // Expose all handlers to menu modules.
+  // Return all actions for menu usage.
   return {
     handleAddTrip,
     handleDeleteTrip,

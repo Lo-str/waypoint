@@ -4,24 +4,24 @@ import { ask, closeInput, pause } from "./input.js";
 import { showMainMenu } from "./menus.js";
 import { seedDemoData } from "./seed.js";
 
-// Default display name used until user provides one.
+// Default name.
 let userName = "Barnaby";
 
-// App bootstrap: seed data, greet user, wire dependencies, and start menu loop.
+// CLI app start.
 const start = async (): Promise<void> => {
-  // Demo content keeps the CLI non-empty for first-time runs.
+  // Add sample data so the app is not empty.
   seedDemoData();
   console.clear();
   logo();
 
-  // Optional personalized greeting.
+  // Ask user for name.
   const name = await ask("\nHeya! What should I call you: ");
   if (name) userName = name;
 
-  // Handlers receive shared input/pause utilities.
+  // Build action functions.
   const handlers = createHandlers({ ask, pause });
 
-  // Start menu navigation and define shutdown behavior.
+  // Handle open main menu and on exit.
   await showMainMenu({
     ask,
     pause,
@@ -35,5 +35,4 @@ const start = async (): Promise<void> => {
   });
 };
 
-// Fire-and-forget startup at module load.
 void start();

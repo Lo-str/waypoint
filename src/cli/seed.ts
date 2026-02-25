@@ -1,8 +1,8 @@
 import { addActivity, addTrip } from "../services/itinerary.js";
 
-// Seed demo trips and activities so the CLI is immediately usable after startup.
+// Testing trips/activities.
 export const seedDemoData = (): void => {
-  // Stockholm sample trip.
+  // Stockholm.
   const stockholm = addTrip("Stockholm", "Sweden", new Date("2026-06-10"));
   addActivity(
     stockholm.id,
@@ -33,7 +33,7 @@ export const seedDemoData = (): void => {
     30,
   );
 
-  // Salvador sample trip.
+  // Salvador.
   const salvador = addTrip("Salvador", "Brasil", new Date("2026-07-02"));
   addActivity(
     salvador.id,
@@ -42,14 +42,56 @@ export const seedDemoData = (): void => {
     "transport",
     10,
   );
-  addActivity(salvador.id, "Food tasting", new Date("2026-07-02T13:00:00"), "food", 35);
-  addActivity(salvador.id, "Museum", new Date("2026-07-03T10:00:00"), "sightseeing", 15);
-  addActivity(salvador.id, "Salvador at night", new Date("2026-07-03T21:00:00"), "fun", 50);
+  addActivity(
+    salvador.id,
+    "Food tasting",
+    new Date("2026-07-02T13:00:00"),
+    "food",
+    35,
+  );
+  addActivity(
+    salvador.id,
+    "Museum",
+    new Date("2026-07-03T10:00:00"),
+    "sightseeing",
+    15,
+  );
+  addActivity(
+    salvador.id,
+    "Salvador at night",
+    new Date("2026-07-03T21:00:00"),
+    "fun",
+    50,
+  );
 
-  // Kyoto sample trip.
+  // Kyoto.
   const kyoto = addTrip("Kyoto", "Japan", new Date("2026-09-14"));
-  addActivity(kyoto.id, "Bus pass", new Date("2026-09-14T08:30:00"), "transport", 8);
-  addActivity(kyoto.id, "Fushimi Inari hike", new Date("2026-09-14T10:00:00"), "sightseeing", 0);
-  addActivity(kyoto.id, "Ramen lunch", new Date("2026-09-14T13:00:00"), "food", 12);
-  addActivity(kyoto.id, "Tea ceremony", new Date("2026-09-15T16:00:00"), "fun", 40);
+  addActivity(
+    kyoto.id,
+    "Bus pass",
+    new Date("2026-09-14T08:30:00"),
+    "transport",
+    8,
+  );
+  addActivity(
+    kyoto.id,
+    "Fushimi Inari hike",
+    new Date("2026-09-14T10:00:00"),
+    "sightseeing",
+    0,
+  );
+  addActivity(
+    kyoto.id,
+    "Ramen lunch",
+    new Date("2026-09-14T13:00:00"),
+    "food",
+    12,
+  );
+  addActivity(
+    kyoto.id,
+    "Tea ceremony",
+    new Date("2026-09-15T16:00:00"),
+    "fun",
+    40,
+  );
 };

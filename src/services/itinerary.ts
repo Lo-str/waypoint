@@ -3,7 +3,6 @@ import type { Activity, Category, Trip } from "../models/types.js";
 
 // Variables
 let trips: Trip[] = [];
-// let activities: Activity[] = [];
 const categories = ["food", "transport", "sightseeing", "fun"];
 const ERROR_T = "Trip 🫣 Sadly this trip doesn't exist yet.";
 const ERROR_A = "Activity 😶‍🌫️ Couldn't find this activity.";
@@ -78,7 +77,6 @@ export const addActivity = (
   const stringId: string = nextId.toString();
 
   // Create and push activity
-
   const foundActivity: Activity = {
     id: stringId,
     name,
@@ -151,10 +149,6 @@ export const updateActivity = (
 
   return foundActivity;
 };
-
-/*********************************************/
-/*  ACTIVITIES VIEWED BY SPECIFIC CRITERIA  */
-/*******************************************/
 
 // View by Day
 export const viewByDay = (tripId: string, date: Date): Activity[] => {

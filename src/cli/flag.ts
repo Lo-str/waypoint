@@ -3,26 +3,26 @@ import { rmSync } from "fs";
 import { tmpdir } from "os";
 import { join } from "path";
 
-// Render a remote PNG in WezTerm if the terminal supports `wezterm imgcat`.
+// Show flag img in WezTerm terminal only.
 export const tryRenderFlagPng = (flagUrl: string): boolean => {
-  // Only run the image flow when we are inside WezTerm.
+  // Stop early if not WezTerm terminal.
   const termProgram = process.env["TERM_PROGRAM"]?.toLowerCase() ?? "";
   if (!termProgram.includes("wezterm")) return false;
 
-  // Use a temporary file since imgcat expects a local path.
+  // Save downloaded img to temp file.
   const tempFile = join(
     tmpdir(),
     `travel-guide-flag-${Date.now()}-${Math.random().toString(36).slice(2)}.png`,
   );
 
   try {
-    // Download image quietly; fail fast if curl cannot fetch it.
+    // Download the img.
     const download = spawnSync("curl", ["-L", "-sS", "-o", tempFile, flagUrl], {
       stdio: "ignore",
     });
     if (download.status !== 0) return false;
 
-    // Print image directly in terminal.
+    // Show img in terminal.
     const result = spawnSync("wezterm", ["imgcat", tempFile], {
       stdio: "inherit",
     });
@@ -30,7 +30,7 @@ export const tryRenderFlagPng = (flagUrl: string): boolean => {
   } catch {
     return false;
   } finally {
-    // Always clean up temporary files.
+    // Delete temp file.
     rmSync(tempFile, { force: true });
   }
 };

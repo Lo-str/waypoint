@@ -2,7 +2,7 @@ import { activityMenu, budgetMenu, tripMenu, uxMenu } from "./design.js";
 import type { CliHandlers } from "./handlers.js";
 import type { AskFn, PauseFn } from "./types.js";
 
-// Dependencies needed to run top-level navigation.
+// Data/functions main menu.
 type MenuDeps = {
   ask: AskFn;
   pause: PauseFn;
@@ -11,7 +11,7 @@ type MenuDeps = {
   onExit: () => void;
 };
 
-// Main navigation loop that routes to trip/activity/budget submenus.
+// Show main menu decide on submenus after input.
 export const showMainMenu = async ({
   ask,
   pause,
@@ -51,15 +51,19 @@ export const showMainMenu = async ({
   onExit();
 };
 
-// Shared dependencies for submenu loops.
+// Data/functions submenu.
 type SubMenuDeps = {
   ask: AskFn;
   pause: PauseFn;
   handlers: CliHandlers;
 };
 
-// Trip submenu loop and action dispatcher.
-const showTripMenu = async ({ ask, pause, handlers }: SubMenuDeps): Promise<void> => {
+// Trip menu loop.
+const showTripMenu = async ({
+  ask,
+  pause,
+  handlers,
+}: SubMenuDeps): Promise<void> => {
   let inTripMenu = true;
 
   while (inTripMenu) {
@@ -91,8 +95,12 @@ const showTripMenu = async ({ ask, pause, handlers }: SubMenuDeps): Promise<void
   }
 };
 
-// Activity submenu loop and action dispatcher.
-const showActivityMenu = async ({ ask, pause, handlers }: SubMenuDeps): Promise<void> => {
+// Activity menu loop.
+const showActivityMenu = async ({
+  ask,
+  pause,
+  handlers,
+}: SubMenuDeps): Promise<void> => {
   let inActivityMenu = true;
 
   while (inActivityMenu) {
@@ -125,8 +133,12 @@ const showActivityMenu = async ({ ask, pause, handlers }: SubMenuDeps): Promise<
   }
 };
 
-// Budget submenu loop and action dispatcher.
-const showBudgetMenu = async ({ ask, pause, handlers }: SubMenuDeps): Promise<void> => {
+// Budget menu loop.
+const showBudgetMenu = async ({
+  ask,
+  pause,
+  handlers,
+}: SubMenuDeps): Promise<void> => {
   let inBudgetMenu = true;
 
   while (inBudgetMenu) {
