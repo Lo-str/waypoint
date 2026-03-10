@@ -1,6 +1,6 @@
 import { activityMenu, budgetMenu, tripMenu, uxMenu } from "./design.js";
 import type { CliHandlers } from "./handlers.js";
-import type { AskFn, PauseFn } from "./types.js";
+import type { AskFn, PauseFn } from "./handlers.js";
 
 // Data/functions main menu.
 type MenuDeps = {

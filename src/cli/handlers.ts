@@ -35,20 +35,21 @@ export type CliHandlers = {
 };
 
 // Action menu loops.
-type AskFn = (question: string) => Promise<string>;
-type PauseFn = () => Promise<void>;
+export type AskFn = (question: string) => Promise<string>;
+export type PauseFn = () => Promise<void>;
 
 type HandlerDeps = {
   ask: AskFn;
   pause: PauseFn;
 };
-
+// Factory function. Creates and returns other functions.
 // Create action functions.
 export const createHandlers = ({ ask, pause }: HandlerDeps): CliHandlers => {
   // Check if we have at least one trip.
   const checkTripsExist = async (): Promise<boolean> => {
     if (listTrips().length > 0) return true;
 
+    // If none, offers to add one.
     const choice = await ask("\nNo trips found. Add one now? (y/n): ");
     if (choice.toLowerCase() === "y") {
       await handleAddTrip(false);
@@ -62,6 +63,7 @@ export const createHandlers = ({ ask, pause }: HandlerDeps): CliHandlers => {
 
   // Pick a trip by number.
   const pickTrip = async (title: string): Promise<Trip | null> => {
+    // Prints a numbered list of all trips
     const trips = listTrips();
     if (trips.length === 0) return null;
 
@@ -72,6 +74,7 @@ export const createHandlers = ({ ask, pause }: HandlerDeps): CliHandlers => {
       console.log(`${i + 1}. ${trip.destination}, ${trip.country} (${date})`);
     }
 
+    // Asks the user to pick a number, validates it, and returns that trip object.
     const selected = Number(await ask("Choose trip number: "));
     if (
       !Number.isInteger(selected) ||

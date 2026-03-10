@@ -2,11 +2,11 @@
 import type { Activity, Category, Trip } from "../models/types.js";
 
 // Variables
-let trips: Trip[] = [];
+const trips: Trip[] = [];
 const categories = ["food", "transport", "sightseeing", "fun"];
-const ERROR_T = "Trip 🫣 Sadly this trip doesn't exist yet.";
-const ERROR_A = "Activity 😶‍🌫️ Couldn't find this activity.";
-const ERROR_I = "🫢 Oops, wrong input!";
+const errorT = "Trip 🫣 Sadly this trip doesn't exist yet.";
+const errorA = "Activity 😶‍🌫️ Couldn't find this activity.";
+const errorI = "🫢 Oops, wrong input!";
 
 export const listTrips = (): Trip[] => {
   return [...trips];
@@ -15,7 +15,7 @@ export const listTrips = (): Trip[] => {
 // Find a Trip by ID
 export const findTrip = (id: string): Trip => {
   const foundId = trips.find((t) => t.id === id);
-  if (!foundId) throw new Error(ERROR_T);
+  if (!foundId) throw new Error(errorT);
 
   return foundId;
 };
@@ -32,7 +32,7 @@ export const addTrip = (
     !(startDate instanceof Date) ||
     Number.isNaN(startDate.getTime())
   ) {
-    throw new Error(ERROR_I);
+    throw new Error(errorI);
   }
 
   // Generates ID
@@ -69,7 +69,7 @@ export const addActivity = (
     !Number.isFinite(cost) ||
     cost < 0
   ) {
-    throw new Error(ERROR_I);
+    throw new Error(errorI);
   }
 
   // Generates ID
@@ -99,21 +99,21 @@ export const deleteActivity = (
 
   // Find activity Index
   const foundIndex = foundTrip.activities.findIndex((a) => a.id === activityId);
-  if (foundIndex === -1) throw new Error(ERROR_A);
+  if (foundIndex === -1) throw new Error(errorA);
 
   // Delete Activity
   const removedActivity = foundTrip.activities.splice(foundIndex, 1)[0];
-  if (!removedActivity) throw new Error(ERROR_A);
+  if (!removedActivity) throw new Error(errorA);
   return removedActivity;
 };
 
 // Delete trip
 export const deleteTrip = (tripId: string): Trip => {
   const foundIndex = trips.findIndex((t) => t.id === tripId);
-  if (foundIndex === -1) throw new Error(ERROR_T);
+  if (foundIndex === -1) throw new Error(errorT);
 
   const removedTrip = trips.splice(foundIndex, 1)[0];
-  if (!removedTrip) throw new Error(ERROR_T);
+  if (!removedTrip) throw new Error(errorT);
   return removedTrip;
 };
 
@@ -128,7 +128,7 @@ export const updateActivity = (
 
   // Find Activity
   const foundActivity = foundTrip.activities.find((a) => a.id === activityId);
-  if (!foundActivity) throw new Error(ERROR_A);
+  if (!foundActivity) throw new Error(errorA);
 
   //
   if (updates.name !== undefined && updates.name !== "")
@@ -154,7 +154,7 @@ export const updateActivity = (
 export const viewByDay = (tripId: string, date: Date): Activity[] => {
   const foundTrip = findTrip(tripId);
   if (!(date instanceof Date) || Number.isNaN(date.getTime()))
-    throw new Error(ERROR_I);
+    throw new Error(errorI);
 
   const tripDate = foundTrip.activities.filter(
     (a) => a.startTime.toDateString() === date.toDateString(),
@@ -190,7 +190,7 @@ export const highCostActivities = (
   limit: number,
 ): Activity[] => {
   const foundTrip = findTrip(tripId);
-  if (!Number.isFinite(limit)) throw new Error(ERROR_A);
+  if (!Number.isFinite(limit)) throw new Error(errorA);
 
   const activityCosts = foundTrip.activities;
   const tooHighCosts = activityCosts.filter((a) => a.cost > limit);
