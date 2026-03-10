@@ -62,9 +62,13 @@ const getNextTrip = (currentTripId: string): Trip | undefined => {
   return sorted[index + 1];
 };
 
+// Returns a Date representing just the calendar day (local midnight) of d.
+const dayOnly = (d: Date): Date =>
+  new Date(d.getFullYear(), d.getMonth(), d.getDate());
+
 // Validates that a startTime falls within the trip's window.
 const validateActivityTime = (startTime: Date, trip: Trip): void => {
-  if (startTime < trip.startDate) {
+  if (dayOnly(startTime) < dayOnly(trip.startDate)) {
     throw new Error(
       "Activity 📅 Start time cannot be before the trip start date.",
     );
