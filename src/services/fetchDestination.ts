@@ -15,7 +15,7 @@ export const getDestinationInfo = async (
       // We check if the response is OK, if not OK, we throw a new Error.
       throw new Error(`Failed to fetch destination info for url: ${url}`);
     }
-    const data: RestCountryResponse[] = await response.json(); // Here we define a new list (JSON representation of the data)
+    const data = (await response.json()) as unknown as RestCountryResponse[]; // Here we define a new list (JSON representation of the data)
     const destinationInfoData = data[0]; // The list contains the interesting data as the first element, we take this.
 
     if (!destinationInfoData) {

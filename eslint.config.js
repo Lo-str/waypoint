@@ -7,7 +7,10 @@ export default tseslint.config(
     ignores: ["dist/**", "node_modules/**"],
   },
   js.configs.recommended,
-  ...tseslint.configs.recommendedTypeChecked,
+  ...tseslint.configs.recommendedTypeChecked.map((config) => ({
+    ...config,
+    files: ["src/**/*.ts"],
+  })),
   {
     files: ["src/**/*.ts"],
     languageOptions: {

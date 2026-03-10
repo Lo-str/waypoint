@@ -15,7 +15,8 @@ import {
   viewByDay,
 } from "../services/itinerary.js";
 import { tryRenderFlagPng } from "./flag.js";
-import { parseCategory, parseDate, parseDateTimeParts } from "./parsers.js";
+import { parseActivityName, parseCategory } from "./parsers.js";
+import { pickDate, pickTime } from "./prompts.js";
 
 // Actions that menu files can call.
 export type CliHandlers = {
@@ -71,7 +72,7 @@ export const createHandlers = ({ ask, pause }: HandlerDeps): CliHandlers => {
     for (let i = 0; i < trips.length; i++) {
       const trip = trips[i]!;
       const date = trip.startDate.toISOString().slice(0, 10);
-      console.log(`${i + 1}. ${trip.destination}, ${trip.country} (${date})`);
+      console.log(`${i + 1}. ${trip.country} (${date})`);
     }
 
     // Asks the user to pick a number, validates it, and returns that trip object.
@@ -125,10 +126,7 @@ export const createHandlers = ({ ask, pause }: HandlerDeps): CliHandlers => {
     console.log(`\n${title}`);
     for (let i = 0; i < activities.length; i++) {
       const activity = activities[i]!;
-      const time = activity.startTime
-        .toISOString()
-        .replace("T", " ")
-        .slice(0, 16);
+      const time = activity.startTime.toISOString().replace("T", " ").slice(0, 16);
       console.log(
         `${i + 1}. ${activity.name} | ${activity.category} | $${activity.cost} | ${time}`,
       );
@@ -150,19 +148,31 @@ export const createHandlers = ({ ask, pause }: HandlerDeps): CliHandlers => {
 
   // Create a trip.
   const handleAddTrip = async (pauseAfter = true): Promise<void> => {
-    const destination = await ask("Destination: ");
     const country = await ask("Country: ");
-    const dateInput = await ask("Start date (YYYY-MM-DD): ");
-    const startDate = parseDate(dateInput);
 
-    if (!destination || !country || !startDate) {
-      console.log("\nInvalid destination, country, or date.");
+    if (!country) {
+      console.log("\nCountry cannot be empty.");
       await pause();
       return;
     }
 
-    const trip = addTrip(destination, country, startDate);
-    console.log(`\nTrip added with id ${trip.id}.`);
+    try {
+      await getDestinationInfo(country);
+    } catch {
+      console.log("\nCountry not found in the API. Please enter a valid country name.");
+      await pause();
+      return;
+    }
+
+    console.log("\nSelect trip start date:");
+    const startDate = await pickDate();
+
+    try {
+      const trip = addTrip(country, startDate);
+      console.log(`\nTrip added with id ${trip.id}.`);
+    } catch (error) {
+      console.log(`\n${(error as Error).message}`);
+    }
     if (pauseAfter) await pause();
   };
 
@@ -175,7 +185,7 @@ export const createHandlers = ({ ask, pause }: HandlerDeps): CliHandlers => {
 
     try {
       const removed = deleteTrip(selectedTrip.id);
-      console.log(`\nDeleted trip ${removed.id} (${removed.destination}).`);
+      console.log(`\nDeleted trip ${removed.id} (${removed.country}).`);
     } catch (error) {
       console.log(`\n${(error as Error).message}`);
     }
@@ -193,7 +203,7 @@ export const createHandlers = ({ ask, pause }: HandlerDeps): CliHandlers => {
       const trip = findTrip(selectedTrip.id);
       const info = await getDestinationInfo(selectedTrip.country);
       console.log(
-        `\n${trip.destination}, ${trip.country} | Currency: ${info.currency.name} ${info.currency.symbol}`,
+        `\n${trip.country} | Currency: ${info.currency.name} ${info.currency.symbol}`,
       );
       const rendered = tryRenderFlagPng(info.flag);
       if (!rendered) {
@@ -216,7 +226,6 @@ export const createHandlers = ({ ask, pause }: HandlerDeps): CliHandlers => {
 
     const rows = trips.map((trip) => ({
       id: trip.id,
-      destination: trip.destination,
       country: trip.country,
       startDate: trip.startDate.toISOString().slice(0, 10),
       activities: trip.activities.length,
@@ -241,26 +250,35 @@ export const createHandlers = ({ ask, pause }: HandlerDeps): CliHandlers => {
     if (!selectedTrip) return;
 
     const tripId = selectedTrip.id;
-    const name = await ask("Activity name: ");
-    const activityDate = await ask("Date (YYYY-MM-DD): ");
-    const activityTime = await ask("Time (HH:mm): ");
+    const name = parseActivityName(await ask("Activity name: "));
+    if (!name) {
+      console.log("\nActivity name must contain only letters and spaces.");
+      await pause();
+      return;
+    }
+
+    console.log("\nSelect activity date:");
+    const activityDate = await pickDate();
+    console.log("\nSelect activity time:");
+    const activityTime = await pickTime();
+    const startTime = new Date(
+      activityDate.getFullYear(),
+      activityDate.getMonth(),
+      activityDate.getDate(),
+      activityTime.hour,
+      activityTime.minute,
+    );
+
     const categoryInput = await ask(
       "Category (food/transport/sightseeing/fun): ",
     );
     const costInput = await ask("Cost: ");
 
-    const startTime = parseDateTimeParts(activityDate, activityTime);
     const category = parseCategory(categoryInput);
     const cost = Number(costInput);
 
-    if (
-      !name ||
-      !startTime ||
-      !category ||
-      !Number.isFinite(cost) ||
-      cost < 0
-    ) {
-      console.log("\nInvalid activity input.");
+    if (!category || !Number.isFinite(cost) || cost < 0) {
+      console.log("\nInvalid category or cost. Cost must be a positive number.");
       await pause();
       return;
     }
@@ -288,8 +306,8 @@ export const createHandlers = ({ ask, pause }: HandlerDeps): CliHandlers => {
     );
     if (!selectedActivity) return;
 
-    const name = await ask("New name (Enter to skip): ");
-    const startTimeInput = await ask("New start time (Enter to skip): ");
+    const nameInput = await ask("New name (Enter to skip): ");
+    const updateTime = await ask("Update start time? (y/n): ");
     const categoryInput = await ask("New category (Enter to skip): ");
     const costInput = await ask("New cost (Enter to skip): ");
 
@@ -300,16 +318,22 @@ export const createHandlers = ({ ask, pause }: HandlerDeps): CliHandlers => {
       cost?: number;
     } = {};
 
-    if (name) updates.name = name;
+    if (nameInput) {
+      updates.name = nameInput.trim();
+    }
 
-    if (startTimeInput) {
-      const startTime = parseDate(startTimeInput);
-      if (!startTime) {
-        console.log("\nInvalid date format.");
-        await pause();
-        return;
-      }
-      updates.startTime = startTime;
+    if (updateTime.toLowerCase() === "y") {
+      console.log("\nSelect new date:");
+      const date = await pickDate();
+      console.log("\nSelect new time:");
+      const time = await pickTime();
+      updates.startTime = new Date(
+        date.getFullYear(),
+        date.getMonth(),
+        date.getDate(),
+        time.hour,
+        time.minute,
+      );
     }
 
     if (categoryInput) {
@@ -376,14 +400,8 @@ export const createHandlers = ({ ask, pause }: HandlerDeps): CliHandlers => {
     if (!selectedTrip) return;
     if (!(await checkTripHasActivities(selectedTrip.id))) return;
 
-    const dateInput = await ask("Date (YYYY-MM-DD): ");
-    const date = parseDate(dateInput);
-
-    if (!date) {
-      console.log("\nInvalid date.");
-      await pause();
-      return;
-    }
+    console.log("\nSelect date to view:");
+    const date = await pickDate();
 
     try {
       const activities = viewByDay(selectedTrip.id, date);

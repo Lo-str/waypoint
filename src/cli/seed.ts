@@ -3,7 +3,7 @@ import { addActivity, addTrip } from "../services/itinerary.js";
 // Testing trips/activities.
 export const seedDemoData = (): void => {
   // Stockholm.
-  const stockholm = addTrip("Stockholm", "Sweden", new Date("2026-06-10"));
+  const stockholm = addTrip("Sweden", new Date("2026-06-10"));
   addActivity(
     stockholm.id,
     "Airport train to city",
@@ -34,10 +34,10 @@ export const seedDemoData = (): void => {
   );
 
   // Salvador.
-  const salvador = addTrip("Salvador", "Brasil", new Date("2026-07-02"));
+  const salvador = addTrip("Brasil", new Date("2026-07-02"));
   addActivity(
     salvador.id,
-    "Brasil 28 day pass",
+    "Brasil day pass",
     new Date("2026-07-02T09:00:00"),
     "transport",
     10,
@@ -65,7 +65,7 @@ export const seedDemoData = (): void => {
   );
 
   // Kyoto.
-  const kyoto = addTrip("Kyoto", "Japan", new Date("2026-09-14"));
+  const kyoto = addTrip("Japan", new Date("2026-09-14"));
   addActivity(
     kyoto.id,
     "Bus pass",

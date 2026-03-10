@@ -26,5 +26,5 @@ export const getActivitiesWithinBudget = (
 // Returns the total trip cost
 export const getBudgetSummary = (trip: Trip): string => {
   const total = calculateTotalCost(trip);
-  return `Total Trip Cost for ${trip.destination}: $${total.toFixed(2)}`;
+  return `Total Trip Cost for ${trip.country}: $${total.toFixed(2)}`;
 };

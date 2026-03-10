@@ -1,12 +1,17 @@
 // Imports
 import type { Activity, Category, Trip } from "../models/types.js";
 
+// Validates that an activity name contains only letters and spaces.
+export const isValidActivityName = (name: string): boolean =>
+  /^[a-zA-Z ]+$/.test(name.trim());
+
 // Variables
 const trips: Trip[] = [];
 const categories = ["food", "transport", "sightseeing", "fun"];
 const errorT = "Trip 🫣 Sadly this trip doesn't exist yet.";
 const errorA = "Activity 😶‍🌫️ Couldn't find this activity.";
 const errorI = "🫢 Oops, wrong input!";
+
 
 export const listTrips = (): Trip[] => {
   return [...trips];
@@ -22,12 +27,10 @@ export const findTrip = (id: string): Trip => {
 
 // Add a Trip
 export const addTrip = (
-  destination: string,
   country: string,
   startDate: Date,
 ): Trip => {
   if (
-    destination.trim() === "" ||
     country.trim() === "" ||
     !(startDate instanceof Date) ||
     Number.isNaN(startDate.getTime())
@@ -42,13 +45,36 @@ export const addTrip = (
   // Build new trip object
   const newTrip: Trip = {
     id: stringId,
-    destination,
     country,
     startDate,
     activities: [],
   };
   trips.push(newTrip);
   return newTrip;
+};
+
+// Returns the trip that starts immediately after the given trip, or undefined.
+const getNextTrip = (currentTripId: string): Trip | undefined => {
+  const sorted = [...trips].sort(
+    (a, b) => a.startDate.getTime() - b.startDate.getTime(),
+  );
+  const index = sorted.findIndex((t) => t.id === currentTripId);
+  return sorted[index + 1];
+};
+
+// Validates that a startTime falls within the trip's window.
+const validateActivityTime = (startTime: Date, trip: Trip): void => {
+  if (startTime < trip.startDate) {
+    throw new Error(
+      "Activity 📅 Start time cannot be before the trip start date.",
+    );
+  }
+  const next = getNextTrip(trip.id);
+  if (next && startTime >= next.startDate) {
+    throw new Error(
+      `Activity 📅 Start time cannot be on or after the start of your next trip (${next.country}, ${next.startDate.toISOString().slice(0, 10)}).`,
+    );
+  }
 };
 
 // Add activity to the array
@@ -62,15 +88,18 @@ export const addActivity = (
   // Search for parent ID
   const foundTrip = findTrip(tripId);
   if (
-    name.trim() === "" ||
+    !isValidActivityName(name) ||
     !(startTime instanceof Date) ||
     Number.isNaN(startTime.getTime()) ||
     !categories.includes(category) ||
+    typeof cost !== "number" ||
     !Number.isFinite(cost) ||
     cost < 0
   ) {
     throw new Error(errorI);
   }
+
+  validateActivityTime(startTime, foundTrip);
 
   // Generates ID
   const nextId: number = foundTrip.activities.length + 1;
@@ -131,13 +160,15 @@ export const updateActivity = (
   if (!foundActivity) throw new Error(errorA);
 
   //
-  if (updates.name !== undefined && updates.name !== "")
+  if (updates.name !== undefined && updates.name.trim() !== "")
     foundActivity.name = updates.name;
   if (
     updates.startTime instanceof Date &&
     !Number.isNaN(updates.startTime.getTime())
-  )
+  ) {
+    validateActivityTime(updates.startTime, foundTrip);
     foundActivity.startTime = updates.startTime;
+  }
   if (updates.category !== undefined && categories.includes(updates.category))
     foundActivity.category = updates.category;
   if (

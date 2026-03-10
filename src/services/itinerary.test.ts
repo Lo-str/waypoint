@@ -24,22 +24,21 @@ test("returns error message when trip is not found", () => {
 
 // addTrip()
 test("returns added trip", () => {
-  const trip = addTrip("Rio de Janeiro", "Brazil", new Date("2026-07-10"));
-  expect(trip.destination).toBe("Rio de Janeiro");
+  const trip = addTrip("Brazil", new Date("2026-07-10"));
   expect(trip.country).toBe("Brazil");
   expect(trip.startDate.toISOString().slice(0, 10)).toBe("2026-07-10");
   expect(trip.activities).toEqual([]);
 });
 
-// Test trip
-const testTrip = addTrip("Rio de Janeiro", "Brazil", new Date("2026-07-10"));
+// Test trip — uses a unique date so no other test trip shares it
+const testTrip = addTrip("Brazil", new Date("2026-06-01"));
 
 // addActivity()
 test("returns added activity when trip has been found", () => {
   const activity = addActivity(
     testTrip.id,
     "Climbing",
-    new Date("2026-01-01T14:30:00Z"),
+    new Date("2026-06-15T14:30:00Z"),
     "fun",
     20,
   );
@@ -77,11 +76,11 @@ test("returns error message when trip is not found and deleted activity when del
 
 // updateActivity()
 test("return updated activity", () => {
-  const testTrip2 = addTrip("Reykjavik", "Iceland", new Date("2027-07-10"));
+  const testTrip2 = addTrip("Iceland", new Date("2027-07-10"));
   const testActivity = addActivity(
     testTrip2.id,
     "Museum",
-    new Date("2026-01-01T14:30:00Z"),
+    new Date("2027-07-15T14:30:00Z"),
     "sightseeing",
     30,
   );
@@ -93,7 +92,7 @@ test("return updated activity", () => {
 
   const activity2 = updateActivity(testTrip2.id, testActivity.id, {
     name: "Exhibition",
-    startTime: new Date("2026-09-01T17:30:00Z"),
+    startTime: new Date("2027-09-01T17:30:00Z"),
     category: "fun",
     cost: 0,
   });
@@ -113,7 +112,7 @@ test("return updated activity", () => {
 });
 
 test("returns error message when updateActivity activity id is missing", () => {
-  const trip = addTrip("Tokyo", "Japan", new Date("2027-03-10"));
+  const trip = addTrip("Japan", new Date("2027-03-10"));
 
   expect(() =>
     updateActivity(trip.id, "999", {
@@ -126,11 +125,11 @@ test("returns error message when updateActivity activity id is missing", () => {
 /*  ACTIVITIES VIEWED BY SPECIFIC CRITERIA  */
 /*******************************************/
 // test trips
-const trip1 = addTrip("Tokyo", "Japan", new Date("2027-03-10"));
-const trip2 = addTrip("Rio de Janeiro", "Brazil", new Date("2027-04-01"));
-const trip3 = addTrip("Reykjavik", "Iceland", new Date("2027-05-15"));
-const trip4 = addTrip("Rome", "Italy", new Date("2027-06-20"));
-const trip5 = addTrip("Vancouver", "Canada", new Date("2027-07-05"));
+const trip1 = addTrip("Japan", new Date("2027-03-10"));
+const trip2 = addTrip("Brazil", new Date("2027-04-01"));
+const trip3 = addTrip("Iceland", new Date("2027-05-15"));
+const trip4 = addTrip("Italy", new Date("2027-06-20"));
+const trip5 = addTrip("Canada", new Date("2027-07-05"));
 
 const t1a1 = addActivity(
   trip1.id,

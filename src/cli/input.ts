@@ -1,16 +1,10 @@
-import { createInterface } from "readline";
+import input from "@inquirer/input";
 
-// Readline object
-const rl = createInterface({
-  input: process.stdin,
-  output: process.stdout,
-});
+const theme = { prefix: "" };
 
 // Ask for input.
-export const ask = (question: string): Promise<string> => {
-  return new Promise((resolve) => {
-    rl.question(question, (input: string) => resolve(input.trim()));
-  });
+export const ask = async (question: string): Promise<string> => {
+  return input({ message: question, theme });
 };
 
 // Wait for input validation.
@@ -18,7 +12,6 @@ export const pause = async (): Promise<void> => {
   await ask("\nPress Enter to continue...");
 };
 
-// Close input when leaving app.
-export const closeInput = (): void => {
-  rl.close();
-};
+// No-ops kept for call-site compatibility.
+export const closeInput = (): void => {};
+export const openInput = (): void => {};
