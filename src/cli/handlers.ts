@@ -259,6 +259,11 @@ export const createHandlers = ({ ask, pause }: HandlerDeps): CliHandlers => {
 
     console.log("\nSelect activity date:");
     const activityDate = await pickDate();
+    if (activityDate < selectedTrip.startDate) {
+      console.log("\nActivity date cannot be before trip start date.");
+      await pause();
+      return;
+    }
     console.log("\nSelect activity time:");
     const activityTime = await pickTime();
     const startTime = new Date(
